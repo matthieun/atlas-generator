@@ -502,7 +502,8 @@ public final class AtlasMutatorHelper implements Serializable
             final List<Tuple2<CountryShard, PackedAtlas>> result = new ArrayList<>();
             try
             {
-                final Optional<Atlas> atlasOption = level.getSourceFetcher().apply(countryShard);
+                final Optional<Atlas> atlasOption = level.getGenerationPolicy(countryShard)
+                        .getAtlasFetcher().apply(countryShard.getShard());
                 atlasOption.ifPresent(atlas ->
                 {
                     if (!(atlas instanceof PackedAtlas))
@@ -666,7 +667,9 @@ public final class AtlasMutatorHelper implements Serializable
     {
         // Wrap in another lambda to get full stack traces in case of error
         return shard -> untouchedShardToPotentialSourcePackedAtlas(level,
-                /* This one needs to be serializable */level.getSourceFetcher()).call(shard);
+                /* This one needs to be serializable */(Function<CountryShard, Optional<Atlas>> & Serializable) countryShard -> level
+                        .getApplicationPolicy(shard).getAtlasFetcher().apply(shard.getShard()))
+                                .call(shard);
     }
 
     protected static PairFlatMapFunction<CountryShard, CountryShard, PackedAtlas> untouchedShardToPotentialSourcePackedAtlas(

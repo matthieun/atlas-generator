@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import org.apache.spark.broadcast.Broadcast;
 import org.openstreetmap.atlas.exception.CoreException;
 import org.openstreetmap.atlas.generator.tools.spark.utilities.SparkFileHelper;
-import org.openstreetmap.atlas.geography.atlas.Atlas;
 import org.openstreetmap.atlas.geography.atlas.dynamic.policy.DynamicAtlasPolicy;
 import org.openstreetmap.atlas.geography.atlas.packed.PackedAtlas;
 import org.openstreetmap.atlas.geography.boundary.CountryShardListing;
@@ -23,7 +22,6 @@ import org.openstreetmap.atlas.geography.sharding.CountryShard;
 import org.openstreetmap.atlas.geography.sharding.Shard;
 import org.openstreetmap.atlas.mutator.AtlasMutator;
 import org.openstreetmap.atlas.mutator.configuration.mutators.ConfiguredAtlasChangeGenerator;
-import org.openstreetmap.atlas.mutator.configuration.parsing.ConfiguredAtlasFetcher;
 import org.openstreetmap.atlas.mutator.configuration.parsing.ConfiguredDynamicAtlasPolicy;
 import org.openstreetmap.atlas.utilities.collections.Sets;
 import org.openstreetmap.atlas.utilities.collections.StringList;
@@ -349,14 +347,6 @@ public class AtlasMutationLevel implements Serializable
             return new MultiMapWithSet<>();
         }
         return this.shardsToCountriesBroadcast.getValue();
-    }
-
-    public Function<CountryShard, Optional<Atlas>> getSourceFetcher()
-    {
-        return countryShard -> ConfiguredAtlasFetcher.direct()
-                .getFetcher(getParentAtlasPath(), countryShard.getCountry(),
-                        this.atlasMutatorConfiguration.getSparkConfiguration())
-                .apply(countryShard.getShard());
     }
 
     public String groupAndIndex()
